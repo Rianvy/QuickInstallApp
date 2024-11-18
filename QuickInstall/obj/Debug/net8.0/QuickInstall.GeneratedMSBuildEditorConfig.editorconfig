@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = QuickInstall
-build_property.ProjectDir = C:\Users\black\Desktop\QuickInstall\QuickInstall\QuickInstall\
+build_property.ProjectDir = C:\Users\black\Documents\GitHub\QuickInstallApp\QuickInstall\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

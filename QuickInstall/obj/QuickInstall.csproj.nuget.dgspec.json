@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\black\\Desktop\\QuickInstall\\QuickInstall\\QuickInstall\\QuickInstall.csproj": {}
+    "C:\\Users\\black\\Documents\\GitHub\\QuickInstallApp\\QuickInstall\\QuickInstall.csproj": {}
   },
   "projects": {
-    "C:\\Users\\black\\Desktop\\QuickInstall\\QuickInstall\\QuickInstall\\QuickInstall.csproj": {
+    "C:\\Users\\black\\Documents\\GitHub\\QuickInstallApp\\QuickInstall\\QuickInstall.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\black\\Desktop\\QuickInstall\\QuickInstall\\QuickInstall\\QuickInstall.csproj",
+        "projectUniqueName": "C:\\Users\\black\\Documents\\GitHub\\QuickInstallApp\\QuickInstall\\QuickInstall.csproj",
         "projectName": "QuickInstall",
-        "projectPath": "C:\\Users\\black\\Desktop\\QuickInstall\\QuickInstall\\QuickInstall\\QuickInstall.csproj",
+        "projectPath": "C:\\Users\\black\\Documents\\GitHub\\QuickInstallApp\\QuickInstall\\QuickInstall.csproj",
         "packagesPath": "C:\\Users\\black\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\black\\Desktop\\QuickInstall\\QuickInstall\\QuickInstall\\obj\\",
+        "outputPath": "C:\\Users\\black\\Documents\\GitHub\\QuickInstallApp\\QuickInstall\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iLPXbbDFQmU=",
+  "dgSpecHash": "9DKrv2urieA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\black\\Desktop\\QuickInstall\\QuickInstall\\QuickInstall\\QuickInstall.csproj",
+  "projectFilePath": "C:\\Users\\black\\Documents\\GitHub\\QuickInstallApp\\QuickInstall\\QuickInstall.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\black\\.nuget\\packages\\clickabletransparentoverlay\\11.0.1\\clickabletransparentoverlay.11.0.1.nupkg.sha512",
     "C:\\Users\\black\\.nuget\\packages\\imgui.net\\1.90.9.1\\imgui.net.1.90.9.1.nupkg.sha512",

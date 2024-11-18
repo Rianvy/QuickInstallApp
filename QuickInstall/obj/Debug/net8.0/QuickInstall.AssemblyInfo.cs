@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuickInstall")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3079cb22519269e36d0728dcc40c6f12d6fd0d1f")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuickInstall")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuickInstall")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
