@@ -53,7 +53,6 @@ namespace QuickInstall
             ImGui.End();
         }
 
-
         private void RenderMenuBar()
         {
             if (ImGui.BeginMenuBar())
