@@ -169,7 +169,9 @@ namespace QuickInstall
 
         private void RenderStatusBar()
         {
-            ImGui.Text($"Status: {status}");
+            ImGui.Separator();
+            ImGui.Text("Status:");
+            ImGui.TextWrapped(status);
         }
 
         private void RenderSearchBar()

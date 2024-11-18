@@ -62,33 +62,59 @@ namespace QuickInstall
 
         public async Task InstallSelectedProgramsAsync()
         {
-            int progress = 0;
+            int maxConcurrentDownloads = 3;
+            var semaphore = new SemaphoreSlim(maxConcurrentDownloads);
+
+            int completed = 0;
             int total = Programs.Count(p => p.IsSelected);
-            foreach (var program in Programs)
+
+            Action<int> onProgressUpdate = (increment) =>
             {
-                if (program.IsSelected)
-                {
-                    if (!program.Architectures.TryGetValue(SelectedArchitecture, out string url))
-                    {
-                        StatusChanged?.Invoke($"Architecture {SelectedArchitecture} not available for {program.Name}.");
-                        continue;
-                    }
+                Interlocked.Add(ref completed, increment);
+                ProgressChanged?.Invoke((completed * 100) / total);
+            };
 
-                    string installerPath = Path.Combine(downloadDirectory, $"{program.Name}_{SelectedArchitecture}.exe");
-                    StatusChanged?.Invoke($"Downloading {program.Name}...");
-                    await downloader.DownloadFileAsync(url, installerPath, p => ProgressChanged?.Invoke(p));
+            var tasks = Programs
+                .Where(p => p.IsSelected)
+                .Select(program => InstallProgramAsync(program, semaphore, total, onProgressUpdate));
 
-                    if (IsInstallAfterDownload)
-                    {
-                        StatusChanged?.Invoke($"Installing {program.Name}...");
-                        installer.InstallProgram(installerPath, program.Arguments, StatusChanged);
-                    }
+            await Task.WhenAll(tasks);
 
-                    progress++;
-                    ProgressChanged?.Invoke((progress * 100) / total);
-                }
-            }
             StatusChanged?.Invoke(IsInstallAfterDownload ? "Installation complete." : "Download complete.");
+        }
+
+        private async Task InstallProgramAsync(ProgramInfo program, SemaphoreSlim semaphore, int total, Action<int> onProgressUpdate)
+        {
+            await semaphore.WaitAsync();
+            try
+            {
+                if (!program.Architectures.TryGetValue(SelectedArchitecture, out string url))
+                {
+                    StatusChanged?.Invoke($"[Error] Architecture {SelectedArchitecture} not available for {program.Name}.");
+                    return;
+                }
+
+                string installerPath = Path.Combine(downloadDirectory, $"{program.Name}_{SelectedArchitecture}.exe");
+                StatusChanged?.Invoke($"Downloading {program.Name}...");
+
+                await downloader.DownloadFileAsync(url, installerPath, p =>
+                {
+                    StatusChanged?.Invoke($"Downloading {program.Name}: {p}%");
+                });
+
+                if (IsInstallAfterDownload)
+                {
+                    StatusChanged?.Invoke($"Installing {program.Name}...");
+                    installer.InstallProgram(installerPath, program.Arguments, StatusChanged);
+                }
+
+                onProgressUpdate(1);
+                StatusChanged?.Invoke($"Completed {program.Name}");
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
     }
 
