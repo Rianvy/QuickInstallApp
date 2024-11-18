@@ -95,6 +95,14 @@ namespace QuickInstall
                 }
 
                 string installerPath = Path.Combine(downloadDirectory, $"{program.Name}_{SelectedArchitecture}.exe");
+
+                if (File.Exists(installerPath))
+                {
+                    StatusChanged?.Invoke($"[Skipped] {program.Name} is already downloaded.");
+                    onProgressUpdate(1);
+                    return;
+                }
+
                 StatusChanged?.Invoke($"Downloading {program.Name}...");
 
                 await downloader.DownloadFileAsync(url, installerPath, p =>
