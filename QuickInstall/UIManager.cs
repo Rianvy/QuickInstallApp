@@ -58,7 +58,7 @@ namespace QuickInstall
         {
             if (ImGui.BeginMenuBar())
             {
-                if (ImGui.BeginMenu("File"))
+                if (ImGui.BeginMenu("Menu"))
                 {
                     if (ImGui.MenuItem("Exit"))
                     {
