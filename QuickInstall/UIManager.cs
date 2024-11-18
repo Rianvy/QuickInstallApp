@@ -9,6 +9,7 @@ namespace QuickInstall
         private ProgramManager programManager;
         private int progress = 0;
         private string status = "Idle";
+        private string searchQuery = "";
 
         public UIManager(ProgramManager programManager) : base(GetScreenWidth(), GetScreenHeight())
         {
@@ -37,6 +38,7 @@ namespace QuickInstall
             RenderTagFilter();
 
             ImGui.Spacing();
+            RenderSearchBar(); // Добавляем строку поиска
             ImGui.Text("Programs:");
             ImGui.Separator();
             RenderProgramList();
@@ -98,37 +100,39 @@ namespace QuickInstall
 
         private void RenderProgramList()
         {
-            bool allSelected = programManager.Programs
-                .Where(p => programManager.SelectedTag == "all" || p.Tags.Contains(programManager.SelectedTag.ToLower()))
-                .All(p => p.IsSelected);
+            bool isSearchActive = !string.IsNullOrEmpty(searchQuery);
 
-            bool noneSelected = programManager.Programs
-                .Where(p => programManager.SelectedTag == "all" || p.Tags.Contains(programManager.SelectedTag.ToLower()))
-                .All(p => !p.IsSelected);
-
-            bool selectAll = allSelected && !noneSelected;
-
-            ImGui.Text($"Programs in category: {programManager.SelectedTag.ToUpper()}");
-            ImGui.Separator();
-
-
-            if (ImGui.Checkbox($"Select All in {programManager.SelectedTag.ToUpper()}", ref selectAll))
+            if (!isSearchActive)
             {
-                foreach (var program in programManager.Programs)
+                bool allSelected = programManager.Programs
+                    .Where(p => programManager.SelectedTag == "all" || p.Tags.Contains(programManager.SelectedTag.ToLower()))
+                    .All(p => p.IsSelected);
+
+                bool noneSelected = programManager.Programs
+                    .Where(p => programManager.SelectedTag == "all" || p.Tags.Contains(programManager.SelectedTag.ToLower()))
+                    .All(p => !p.IsSelected);
+
+                bool selectAll = allSelected && !noneSelected;
+
+                if (ImGui.Checkbox($"Select All in {programManager.SelectedTag.ToUpper()}", ref selectAll))
                 {
-                    if (programManager.SelectedTag == "all" || program.Tags.Contains(programManager.SelectedTag.ToLower()))
+                    foreach (var program in programManager.Programs)
                     {
-                        program.IsSelected = selectAll;
+                        if (programManager.SelectedTag == "all" || program.Tags.Contains(programManager.SelectedTag.ToLower()))
+                        {
+                            program.IsSelected = selectAll;
+                        }
                     }
                 }
-            }
 
-            ImGui.Separator();
+                ImGui.Separator();
+            }
 
             ImGui.BeginChild("ProgramList");
             foreach (var program in programManager.Programs)
             {
-                if (programManager.SelectedTag == "all" || program.Tags.Contains(programManager.SelectedTag.ToLower()))
+                if ((programManager.SelectedTag == "all" || program.Tags.Contains(programManager.SelectedTag.ToLower())) &&
+                    (string.IsNullOrEmpty(searchQuery) || program.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)))
                 {
                     bool isSelected = program.IsSelected;
                     if (ImGui.Checkbox(program.Name, ref isSelected))
@@ -139,10 +143,8 @@ namespace QuickInstall
             }
             ImGui.EndChild();
 
-            ImGui.Separator(); 
+            ImGui.Separator();
         }
-
-
 
         private void RenderInstallAfter()
         {
@@ -152,7 +154,6 @@ namespace QuickInstall
                 programManager.IsInstallAfterDownload = installAfterDownload;
             }
         }
-
 
         private void RenderInstallButton()
         {
@@ -171,6 +172,22 @@ namespace QuickInstall
         {
             ImGui.Text($"Status: {status}");
         }
-    }
 
+        private void RenderSearchBar()
+        {
+            ImGui.Text("Search:");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(200);
+            ImGui.InputText("##search", ref searchQuery, 256);
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("Clear"))
+                {
+                    searchQuery = "";
+                }
+            }
+        }
+    }
 }
