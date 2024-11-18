@@ -10,6 +10,7 @@ namespace QuickInstall
         private int progress = 0;
         private string status = "Idle";
         private string searchQuery = "";
+        private bool isFirstRender = true;
 
         public UIManager(ProgramManager programManager) : base(GetScreenWidth(), GetScreenHeight())
         {
@@ -26,6 +27,13 @@ namespace QuickInstall
 
         protected override void Render()
         {
+            if (isFirstRender)
+            {
+                ImGui.SetNextWindowPos(new System.Numerics.Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2), ImGuiCond.Always, new System.Numerics.Vector2(0.5f, 0.5f));
+                isFirstRender = false;
+            }
+
+            ImGui.SetNextWindowSizeConstraints(new System.Numerics.Vector2(704, 377), new System.Numerics.Vector2(float.MaxValue, float.MaxValue));
             ImGui.Begin("QuickInstall", ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
 
             RenderMenuBar();
@@ -72,9 +80,6 @@ namespace QuickInstall
                 ImGui.EndMenuBar();
             }
         }
-
-
-
 
         private void RenderArchitectureSelection()
         {
