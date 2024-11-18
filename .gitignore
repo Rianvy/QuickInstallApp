@@ -1,0 +1,57 @@
+# ОС-специфичные файлы
+.DS_Store
+Thumbs.db
+
+# Visual Studio
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build (исключение всех артефактов сборки)
+QuickInstall/bin/
+QuickInstall/obj/
+[Bb]uild/
+![Bb]uild/[Rr]elease
+
+# Logs
+*.log
+*.tlog
+*.dmp
+*.ldf
+
+# Packages
+*.nupkg
+*.snupkg
+*.sln.metaproj
+*.sln.metaproj.user
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Rider
+.idea/
+*.iws
+*.iml
+out/
+
+# Windows-темп
+*.class
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# Настройки NuGet
+project.lock.json
+project.fragment.lock.json
+
+# JSON данные
+*.json.bak
+
+# System files
+.DS_Store
+Temp/

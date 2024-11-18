@@ -28,16 +28,29 @@ namespace QuickInstall
             ImGui.Begin("QuickInstall", ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
 
             RenderMenuBar();
+
+            ImGui.Spacing();
+            ImGui.Text("Configuration:");
+            ImGui.Separator();
             RenderArchitectureSelection();
             RenderInstallAfter();
             RenderTagFilter();
+
+            ImGui.Spacing();
+            ImGui.Text("Programs:");
+            ImGui.Separator();
             RenderProgramList();
+
+            ImGui.Spacing();
             RenderInstallButton();
+
+            ImGui.Spacing();
             RenderProgressBar();
             RenderStatusBar();
 
             ImGui.End();
         }
+
 
         private void RenderMenuBar()
         {
@@ -85,14 +98,51 @@ namespace QuickInstall
 
         private void RenderProgramList()
         {
+            bool allSelected = programManager.Programs
+                .Where(p => programManager.SelectedTag == "all" || p.Tags.Contains(programManager.SelectedTag.ToLower()))
+                .All(p => p.IsSelected);
+
+            bool noneSelected = programManager.Programs
+                .Where(p => programManager.SelectedTag == "all" || p.Tags.Contains(programManager.SelectedTag.ToLower()))
+                .All(p => !p.IsSelected);
+
+            bool selectAll = allSelected && !noneSelected;
+
+            ImGui.Text($"Programs in category: {programManager.SelectedTag.ToUpper()}");
+            ImGui.Separator();
+
+
+            if (ImGui.Checkbox($"Select All in {programManager.SelectedTag.ToUpper()}", ref selectAll))
+            {
+                foreach (var program in programManager.Programs)
+                {
+                    if (programManager.SelectedTag == "all" || program.Tags.Contains(programManager.SelectedTag.ToLower()))
+                    {
+                        program.IsSelected = selectAll;
+                    }
+                }
+            }
+
+            ImGui.Separator();
+
+            ImGui.BeginChild("ProgramList");
             foreach (var program in programManager.Programs)
             {
                 if (programManager.SelectedTag == "all" || program.Tags.Contains(programManager.SelectedTag.ToLower()))
                 {
-                    ImGui.Checkbox(program.Name, ref program.IsSelected);
+                    bool isSelected = program.IsSelected;
+                    if (ImGui.Checkbox(program.Name, ref isSelected))
+                    {
+                        program.IsSelected = isSelected;
+                    }
                 }
             }
+            ImGui.EndChild();
+
+            ImGui.Separator(); 
         }
+
+
 
         private void RenderInstallAfter()
         {
