@@ -38,17 +38,10 @@ namespace QuickInstall
             RenderTagFilter();
 
             ImGui.Spacing();
-            RenderSearchBar(); // Добавляем строку поиска
+            RenderSearchBar();
             ImGui.Text("Programs:");
             ImGui.Separator();
             RenderProgramList();
-
-            ImGui.Spacing();
-            RenderInstallButton();
-
-            ImGui.Spacing();
-            RenderProgressBar();
-            RenderStatusBar();
 
             ImGui.End();
         }
@@ -65,9 +58,23 @@ namespace QuickInstall
                     }
                     ImGui.EndMenu();
                 }
+
+                RenderInstallButton();
+
+                ImGui.Separator();
+
+                RenderProgressBar();
+
+                ImGui.Separator();
+
+                RenderStatusBar();
+
                 ImGui.EndMenuBar();
             }
         }
+
+
+
 
         private void RenderArchitectureSelection()
         {
@@ -164,12 +171,11 @@ namespace QuickInstall
 
         private void RenderProgressBar()
         {
-            ImGui.ProgressBar(progress / 100f, new System.Numerics.Vector2(-1, 20), $"{progress}%");
+            ImGui.ProgressBar(progress / 100f, new System.Numerics.Vector2(200, 20), $"{progress}%");
         }
 
         private void RenderStatusBar()
         {
-            ImGui.Separator();
             ImGui.Text("Status:");
             ImGui.TextWrapped(status);
         }
