@@ -56,3 +56,6 @@ project.fragment.lock.json
 .DS_Store
 Temp/
 /.vs/QuickInstall/DesignTimeBuild
+/QuickInstall/obj/Debug
+/QuickInstall/obj/Debug/net8.0
+/.vs/QuickInstall/DesignTimeBuild
