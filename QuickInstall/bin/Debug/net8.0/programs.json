@@ -1,0 +1,29 @@
+[
+  {
+    "Name": "Visual Studio Code",
+    "Architectures": {
+      "32-bit": "https://update.code.visualstudio.com/latest/win32/stable",
+      "64-bit": "https://update.code.visualstudio.com/latest/win32-x64/stable"
+    },
+    "Arguments": "/silent /install",
+    "Tags": [ "developer" ]
+  },
+  {
+    "Name": "7-Zip",
+    "Architectures": {
+      "32-bit": "https://www.7-zip.org/a/7z2201.exe",
+      "64-bit": "https://www.7-zip.org/a/7z2201-x64.exe"
+    },
+    "Arguments": "/S",
+    "Tags": [ "utility" ]
+  },
+  {
+    "Name": "Mozilla Firefox",
+    "Architectures": {
+      "32-bit": "https://download.mozilla.org/?product=firefox-latest&os=win&lang=en-US",
+      "64-bit": "https://download.mozilla.org/?product=firefox-latest&os=win64&lang=en-US"
+    },
+    "Arguments": "/S",
+    "Tags": [ "browser" ]
+  }
+]
