@@ -55,3 +55,4 @@ project.fragment.lock.json
 # System files
 .DS_Store
 Temp/
+/.vs/QuickInstall/DesignTimeBuild
