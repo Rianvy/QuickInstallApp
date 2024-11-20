@@ -2,126 +2,147 @@
 
 namespace QuickInstall
 {
-    class ProgramManager
+    public class ProgramManager
     {
-        public List<ProgramInfo> Programs { get; private set; }
-        public HashSet<string> Tags { get; private set; }
+        public List<ProgramInfo> Programs { get; private set; } = new();
+        public HashSet<string> Tags { get; private set; } = new() { "all" };
         public string SelectedTag { get; set; } = "all";
         public string SelectedArchitecture { get; set; } = "64-bit";
-        public bool IsInstallAfterDownload { get; set; } = false;
+        public bool IsInstallAfterDownload { get; set; }
 
-        private string jsonPath;
-        private string downloadDirectory;
-        private Downloader downloader;
-        private Installer installer;
+        private readonly string _jsonPath;
+        private readonly string _downloadDirectory;
+        private readonly Downloader _downloader;
+        private readonly Installer _installer;
 
-        public event Action<int> ProgressChanged;
-        public event Action<string> StatusChanged;
+        public event Action<int>? ProgressChanged;
+        public event Action<string>? StatusChanged;
 
         public ProgramManager(string jsonPath, string downloadDirectory)
         {
-            this.jsonPath = jsonPath;
-            this.downloadDirectory = downloadDirectory;
-            this.downloader = new Downloader();
-            this.installer = new Installer();
-            Directory.CreateDirectory(downloadDirectory);
+            if (string.IsNullOrWhiteSpace(jsonPath))
+                throw new ArgumentException("JSON path cannot be null or empty.", nameof(jsonPath));
+
+            if (string.IsNullOrWhiteSpace(downloadDirectory))
+                throw new ArgumentException("Download directory cannot be null or empty.", nameof(downloadDirectory));
+
+            _jsonPath = jsonPath;
+            _downloadDirectory = downloadDirectory;
+            _downloader = new Downloader();
+            _installer = new Installer();
+            Directory.CreateDirectory(_downloadDirectory);
 
             LoadPrograms();
         }
 
         private void LoadPrograms()
         {
-            Tags = new HashSet<string> { "all" };
-            if (File.Exists(jsonPath))
+            try
             {
-                try
+                if (!File.Exists(_jsonPath))
                 {
-                    var json = File.ReadAllText(jsonPath);
-                    Programs = JsonConvert.DeserializeObject<List<ProgramInfo>>(json);
+                    StatusChanged?.Invoke("Program list JSON not found. Creating an empty program list.");
+                    return;
+                }
 
-                    foreach (var program in Programs)
+                var json = File.ReadAllText(_jsonPath);
+                Programs = JsonConvert.DeserializeObject<List<ProgramInfo>>(json) ?? new List<ProgramInfo>();
+
+                foreach (var program in Programs)
+                {
+                    foreach (var tag in program.Tags)
                     {
-                        foreach (var tag in program.Tags)
-                        {
-                            Tags.Add(tag.ToLower());
-                        }
+                        Tags.Add(tag.ToLower());
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error loading programs: {ex.Message}");
-                    Programs = new List<ProgramInfo>();
-                }
             }
-            else
+            catch (JsonException ex)
             {
-                Console.WriteLine("Program list JSON not found, creating an empty list.");
+                StatusChanged?.Invoke($"Error parsing JSON: {ex.Message}");
+                Programs = new List<ProgramInfo>();
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke($"Unexpected error loading programs: {ex.Message}");
                 Programs = new List<ProgramInfo>();
             }
         }
 
         public async Task InstallSelectedProgramsAsync()
         {
-            int maxConcurrentDownloads = 3;
-            var semaphore = new SemaphoreSlim(maxConcurrentDownloads);
+            var selectedPrograms = Programs.Where(p => p.IsSelected).ToList();
+            if (!selectedPrograms.Any())
+            {
+                StatusChanged?.Invoke("No programs selected for installation.");
+                return;
+            }
+
+            const int maxConcurrentDownloads = 3;
+            using var semaphore = new SemaphoreSlim(maxConcurrentDownloads);
 
             int completed = 0;
-            int total = Programs.Count(p => p.IsSelected);
+            int total = selectedPrograms.Count;
 
-            Action<int> onProgressUpdate = (increment) =>
+            ProgressChanged?.Invoke(0);
+
+            async Task InstallProgramWrapper(ProgramInfo program)
             {
-                Interlocked.Add(ref completed, increment);
-                ProgressChanged?.Invoke((completed * 100) / total);
-            };
+                await semaphore.WaitAsync();
+                try
+                {
+                    await InstallProgramAsync(program);
+                    Interlocked.Increment(ref completed);
+                    ProgressChanged?.Invoke((completed * 100) / total);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
 
-            var tasks = Programs
-                .Where(p => p.IsSelected)
-                .Select(program => InstallProgramAsync(program, semaphore, total, onProgressUpdate));
+            var tasks = selectedPrograms.Select(InstallProgramWrapper);
 
             await Task.WhenAll(tasks);
 
             StatusChanged?.Invoke(IsInstallAfterDownload ? "Installation complete." : "Download complete.");
         }
 
-        private async Task InstallProgramAsync(ProgramInfo program, SemaphoreSlim semaphore, int total, Action<int> onProgressUpdate)
+        private async Task InstallProgramAsync(ProgramInfo program)
         {
-            await semaphore.WaitAsync();
+            if (!program.Architectures.TryGetValue(SelectedArchitecture, out var url))
+            {
+                StatusChanged?.Invoke($"[Error] Architecture {SelectedArchitecture} not available for {program.Name}.");
+                return;
+            }
+
+            var installerPath = Path.Combine(_downloadDirectory, $"{program.Name}_{SelectedArchitecture}.exe");
+
+            if (File.Exists(installerPath))
+            {
+                StatusChanged?.Invoke($"[Skipped] {program.Name} is already downloaded.");
+                return;
+            }
+
             try
             {
-                if (!program.Architectures.TryGetValue(SelectedArchitecture, out string url))
-                {
-                    StatusChanged?.Invoke($"[Error] Architecture {SelectedArchitecture} not available for {program.Name}.");
-                    return;
-                }
-
-                string installerPath = Path.Combine(downloadDirectory, $"{program.Name}_{SelectedArchitecture}.exe");
-
-                if (File.Exists(installerPath))
-                {
-                    StatusChanged?.Invoke($"[Skipped] {program.Name} is already downloaded.");
-                    onProgressUpdate(1);
-                    return;
-                }
-
                 StatusChanged?.Invoke($"Downloading {program.Name}...");
 
-                await downloader.DownloadFileAsync(url, installerPath, p =>
+                await _downloader.DownloadFileAsync(url, installerPath, progress =>
                 {
-                    StatusChanged?.Invoke($"Downloading {program.Name}: {p}%");
+                    StatusChanged?.Invoke($"Downloading {program.Name}: {progress}%");
                 });
 
                 if (IsInstallAfterDownload)
                 {
                     StatusChanged?.Invoke($"Installing {program.Name}...");
-                    installer.InstallProgram(installerPath, program.Arguments, StatusChanged);
+                    _installer.InstallProgram(installerPath, program.Arguments ?? string.Empty, StatusChanged ?? (_ => { }));
                 }
 
-                onProgressUpdate(1);
                 StatusChanged?.Invoke($"Completed {program.Name}");
             }
-            finally
+            catch (Exception ex)
             {
-                semaphore.Release();
+                StatusChanged?.Invoke($"[Error] Failed to process {program.Name}: {ex.Message}");
             }
         }
     }
