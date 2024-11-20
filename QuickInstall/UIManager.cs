@@ -138,7 +138,12 @@ namespace QuickInstall
         private void RenderTags()
         {
             ImGui.Text("Tags:");
-            ImGui.BeginChild("TagFilter", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, 200));
+
+            float defaultHeight = 200;
+            float availableHeight = ImGui.GetContentRegionAvail().Y;
+            float height = availableHeight > defaultHeight ? availableHeight : defaultHeight;
+
+            ImGui.BeginChild("TagFilter", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, height));
 
             foreach (var tag in _programManager.Tags)
             {
